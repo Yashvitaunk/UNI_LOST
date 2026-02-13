@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search or Matching Result Page</title>
+  <style>
+    /* 🌈 Base & Background */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #dbeafe, #f3e8ff);
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      margin-top: 25px;
+      color: #4f46e5;
+      text-align: center;
+      font-size: 28px;
+      animation: slideDown 1.2s ease;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h2 {
+      text-align: center;
+      color: #4338ca;
+      font-size: 18px;
+      margin-bottom: 25px;
+    }
+
+    /* 🔍 Search Bar */
+    .search-bar {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeIn 1.5s ease;
+    }
+
+    .search-bar input, .search-bar select {
+      padding: 10px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: 0.3s;
+    }
+
+    .search-bar input:focus, .search-bar select:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 8px rgba(99,102,241,0.3);
+      transform: scale(1.03);
+    }
+
+    .search-bar button {
+      background: #6366f1;
+      color: #fff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: 0.3s;
+    }
+
+    .search-bar button:hover {
+      background: #4f46e5;
+      transform: scale(1.05);
+    }
+
+    /* 📦 Result Section */
+    .results {
+      width: 90%;
+      max-width: 1000px;
+      background: #ffffff;
+      margin-top: 30px;
+      border-radius: 18px;
+      padding: 25px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      animation: slideUp 1.2s ease;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: #f9fafb;
+      border-radius: 15px;
+      padding: 15px;
+      box-shadow: 0 5px 12px rgba(0,0,0,0.1);
+      transition: 0.4s;
+      text-align: center;
+    }
+
+    .card:hover {
+      transform: translateY(-8px);
+      background: #eef2ff;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    }
+
+    .card img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    .card h3 {
+      color: #4338ca;
+      margin-bottom: 5px;
+      font-size: 16px;
+    }
+
+    .card p {
+      font-size: 13px;
+      color: #555;
+      line-height: 1.4;
+      margin-bottom: 10px;
+    }
+
+    .claim-btn {
+      background: linear-gradient(90deg, #6366f1, #8b5cf6);
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .claim-btn:hover {
+      background: linear-gradient(90deg, #4f46e5, #7c3aed);
+      transform: scale(1.05);
+    }
+
+    footer {
+      margin-top: 25px;
+      color: #666;
+      font-size: 13px;
+      text-align: center;
+    }
+
+  </style>
+</head>
+<body>
+
+  <h1>Lost and Found System</h1>
+  <h2>Search or Matching Result Page</h2>
+
+  <!-- 🔎 Search Bar -->
+  <div class="search-bar">
+    <input type="text" placeholder="Enter item name...">
+    <select>
+      <option>All Categories</option>
+      <option>Documents</option>
+      <option>Electronics</option>
+      <option>Accessories</option>
+      <option>Books</option>
+    </select>
+    <button>Search</button>
+  </div>
+
+  <!-- 📦 Result Section -->
+  <div class="results">
+    <div class="cards">
+      <div class="card">
+        <img src="https://images.unsplash.com/photo-1555633514-abcee6ab92b1?auto=format&fit=crop&w=400&q=80" alt="Wallet">
+        <h3>Black Wallet</h3>
+        <p><b>Found At:</b> Canteen<br><b>Date:</b> Oct 10, 2025<br><b>Details:</b> Brown leather wallet found near payment counter.</p>
+        <button class="claim-btn">Claim Item</button>
+      </div>
+
+      <div class="card">
+        <img src="https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=400&q=80" alt="ID Card">
+        <h3>Student ID Card</h3>
+        <p><b>Found At:</b> Library<br><b>Date:</b> Oct 9, 2025<br><b>Details:</b> ID card found near computer lab.</p>
+        <button class="claim-btn">Claim Item</button>
+      </div>
+
+      <div class="card">
+        <img src="https://images.unsplash.com/photo-1524492449090-9d8a21e6d1f6?auto=format&fit=crop&w=400&q=80" alt="Book">
+        <h3>Notebook</h3>
+        <p><b>Found At:</b> Lecture Hall 204<br><b>Date:</b> Oct 8, 2025<br><b>Details:</b> Spiral notebook titled 'DBMS Notes'.</p>
+        <button class="claim-btn">Claim Item</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    © 2025 Lost & Found System | Designed for Campus Use
+  </footer>
+
+</body>
+</html>

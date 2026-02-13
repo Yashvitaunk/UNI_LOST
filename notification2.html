@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lost & Found - Notification Demo</title>
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: #f0f4f8;
+    margin: 0;
+    padding: 0;
+  }
+
+  header {
+    text-align: center;
+    padding: 30px;
+    background: linear-gradient(135deg, #6b73ff, #000dff);
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+  }
+
+  .container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+
+  .item-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .item-info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .item-info h3 {
+    margin: 0 0 5px 0;
+    font-size: 20px;
+  }
+
+  .item-info p {
+    margin: 0;
+    color: #555;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+  }
+
+  /* Notification */
+  .notification {
+    position: fixed;
+    top: 30px;
+    right: 30px;
+    width: 320px;
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
+    color: white;
+    border-radius: 15px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+    padding: 20px 25px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.5s ease;
+    z-index: 1000;
+  }
+
+  .notification.show {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .notification svg {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    animation: bounce 1s infinite alternate;
+  }
+
+  @keyframes bounce {
+    from { transform: translateY(0); }
+    to { transform: translateY(-5px); }
+  }
+
+  .notification-content h4 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .notification-content p {
+    margin: 5px 0 0 0;
+    font-size: 14px;
+  }
+
+  .close-btn {
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 18px;
+    flex-shrink: 0;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+  }
+
+  .close-btn:hover {
+    opacity: 1;
+  }
+</style>
+</head>
+<body>
+
+<header>Lost & Found System</header>
+
+<div class="container">
+  <!-- Item Card Example -->
+  <div class="item-card">
+    <div class="item-info">
+      <h3>Blue Backpack</h3>
+      <p>Lost on 12th Oct 2025, near Library</p>
+    </div>
+    <button class="btn" onclick="approveItem('Blue Backpack')">Check Status</button>
+  </div>
+
+  <div class="item-card">
+    <div class="item-info">
+      <h3>Black Wallet</h3>
+      <p>Lost on 10th Oct 2025, near Cafeteria</p>
+    </div>
+    <button class="btn" onclick="approveItem('Black Wallet')">Check Status</button>
+  </div>
+
+  <div class="item-card">
+    <div class="item-info">
+      <h3>Red Umbrella</h3>
+      <p>Lost on 11th Oct 2025, near Bus Stop</p>
+    </div>
+    <button class="btn" onclick="approveItem('Red Umbrella')">Check Status</button>
+  </div>
+</div>
+
+<!-- Notification -->
+<div id="notification" class="notification">
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+  </svg>
+  <div class="notification-content">
+    <h4>Item Approved!</h4>
+    <p id="notif-text"></p>
+  </div>
+  <div class="close-btn" onclick="closeNotification()">×</div>
+</div>
+
+<script>
+  const notification = document.getElementById('notification');
+  const notifText = document.getElementById('notif-text');
+
+  function approveItem(itemName) {
+    // Simulate admin approval
+    notifText.textContent = `Your item "${itemName}" has been approved by the admin. You can collect it now.`;
+    notification.classList.add('show');
+
+    // Auto hide after 6 seconds
+    setTimeout(() => {
+      notification.classList.remove('show');
+    }, 6000);
+  }
+
+  function closeNotification() {
+    notification.classList.remove('show');
+  }
+</script>
+
+</body>
+</html>
