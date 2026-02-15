@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin / Confirmation Page</title>
+  <style>
+    /* 🌈 Soothing Background */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #e0f2fe, #f5e0ff);
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      text-align: center;
+      color: #4f46e5;
+      margin-top: 30px;
+      font-size: 28px;
+      animation: slideDown 1.2s ease;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h2 {
+      text-align: center;
+      color: #4338ca;
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+
+    /* 🧾 Table Container */
+    .container {
+      background: #ffffff;
+      width: 90%;
+      max-width: 1000px;
+      margin-top: 20px;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      padding: 25px;
+      animation: slideUp 1.2s ease;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      padding: 12px 10px;
+      text-align: center;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 14px;
+    }
+
+    th {
+      background: #eef2ff;
+      color: #4f46e5;
+      font-weight: 600;
+    }
+
+    tr:hover {
+      background: #f9fafb;
+      transition: 0.3s;
+    }
+
+    /* ✅ Action Buttons */
+    .action-btn {
+      border: none;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .approve {
+      background: #22c55e;
+      color: #fff;
+    }
+
+    .approve:hover {
+      background: #16a34a;
+      transform: scale(1.05);
+    }
+
+    .reject {
+      background: #ef4444;
+      color: #fff;
+    }
+
+    .reject:hover {
+      background: #dc2626;
+      transform: scale(1.05);
+    }
+
+    /* 💬 Confirmation Box */
+    .status-box {
+      margin-top: 25px;
+      padding: 12px 20px;
+      border-left: 6px solid #4f46e5;
+      background: #eef2ff;
+      border-radius: 10px;
+      font-size: 14px;
+      text-align: center;
+      color: #4338ca;
+      animation: fadeIn 1.5s ease;
+    }
+
+    footer {
+      margin-top: 25px;
+      text-align: center;
+      font-size: 13px;
+      color: #666;
+    }
+
+  </style>
+</head>
+<body>
+
+  <h1>Lost and Found System</h1>
+  <h2>Admin / Confirmation Page</h2>
+
+  <div class="container">
+    <table>
+      <tr>
+        <th>Item ID</th>
+        <th>Item Name</th>
+        <th>Claimed By</th>
+        <th>Finder Name</th>
+        <th>Date Found</th>
+        <th>Proof Provided</th>
+        <th>Action</th>
+      </tr>
+      <tr>
+        <td>#101</td>
+        <td>Black Wallet</td>
+        <td>Riya Sharma</td>
+        <td>Aditya Singh</td>
+        <td>Oct 10, 2025</td>
+        <td>Color & initials matched</td>
+        <td>
+          <button class="action-btn approve">Approve</button>
+          <button class="action-btn reject">Reject</button>
+        </td>
+      </tr>
+      <tr>
+        <td>#102</td>
+        <td>ID Card</td>
+        <td>Rohan Patel</td>
+        <td>Priya Mehta</td>
+        <td>Oct 9, 2025</td>
+        <td>College ID number verified</td>
+        <td>
+          <button class="action-btn approve">Approve</button>
+          <button class="action-btn reject">Reject</button>
+        </td>
+      </tr>
+      <tr>
+        <td>#103</td>
+        <td>Notebook</td>
+        <td>Nehja Verma</td>
+        <td>Arjun Gupta</td>
+        <td>Oct 8, 2025</td>
+        <td>Name on cover matched</td>
+        <td>
+          <button class="action-btn approve">Approve</button>
+          <button class="action-btn reject">Reject</button>
+        </td>
+      </tr>
+    </table>
+
+    <div class="status-box">
+      ✅ Admin can review each claim and confirm or reject ownership. Once approved, the system updates the status to <b>“Returned”</b>.
+    </div>
+  </div>
+
+  <footer>
+    © 2025 Lost & Found System | Admin Verification Portal
+  </footer>
+
+</body>
+</html>

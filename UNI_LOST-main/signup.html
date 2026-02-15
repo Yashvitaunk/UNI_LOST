@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up - Uni Lost</title>
+  <style>
+    body { margin: 0; font-family: 'Poppins', sans-serif; background: url('muj.png') no-repeat center center/cover; height: 100vh; display: flex; justify-content: center; align-items: center; position: relative; }
+    body::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.55); z-index: 1; }
+    .container { position: relative; z-index: 2; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); padding: 35px 30px; border-radius: 16px; width: 400px; box-shadow: 0 6px 20px rgba(0,0,0,0.25); text-align: center; }
+    h1 { color: #1e3a8a; font-size: 22px; margin-bottom: 20px; }
+    label { display: block; margin-bottom: 6px; font-size: 13px; color: #333; text-align: left; }
+    input { width: 100%; padding: 12px; margin-bottom: 16px; border-radius: 8px; border: 1px solid #bbb; box-sizing: border-box; outline: none; }
+    .btn { width: 100%; padding: 12px; background: #1d4ed8; color: white; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; transition: 0.3s; }
+    .btn:hover { background: #0f3bb6; }
+    .login-link { font-size: 13px; margin-top: 15px; color: #333; }
+    .login-link a { color: #1d4ed8; text-decoration: none; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Create Account</h1>
+    <form id="signupForm">
+      <label>Full Name</label>
+      <input type="text" id="name" placeholder="Enter your full name" required>
+      <label>Email Address</label>
+      <input type="email" id="email" placeholder="Enter your email" required>
+      <label>Mobile Number</label>
+      <input type="tel" id="mobile" placeholder="Enter mobile number" required>
+      <label>Password</label>
+      <input type="password" id="password" placeholder="Create a password" required>
+      <button type="submit" class="btn">Register</button>
+    </form>
+    <div class="login-link">
+      Already have an account? <a href="login.html">Login here</a>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const userData = {
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        mobile: document.getElementById('mobile').value,
+        password: document.getElementById('password').value
+      };
+
+      try {
+        const response = await fetch('http://localhost:5000/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(userData)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          alert('Account created successfully! Redirecting to login...');
+          window.location.href = 'login.html'; // Go back to login
+        } else {
+          alert(data.error || 'Registration failed');
+        }
+      } catch (err) {
+        alert('Server connection failed. Make sure your backend is running!');
+      }
+    });
+  </script>
+</body>
+</html>
