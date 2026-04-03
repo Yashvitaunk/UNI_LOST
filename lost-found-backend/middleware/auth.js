@@ -1,74 +1,47 @@
-// middleware/auth.js
-const jwt = require('jsonwebtoken');
-module.exports = function(req, res, next) {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // extract token
-  if (!token) return res.status(401).json({ error: 'Auth token missing' });
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;      // attach payload (e.g. {userId, email, role})
-    next();
-  } catch (err) {
-    return res.status(403).json({ error: 'Invalid/Expired token' });
-  }
-};
-router.post('/items', authMiddleware, async (req, res) => {
-  const data = { ...req.body, reportedBy: req.user.userId };
-  const item = new Item(data);
-  await item.save();
-  res.status(201).json(item);
-});
-router.get('/items', async (req, res) => {
-  const filter = {};
-  if (req.query.category) filter.category = req.query.category;
-  if (req.query.location) filter.location = req.query.location;
-  if (req.query.itemType) filter.itemType = req.query.itemType;
-  const items = await Item.find(filter).sort({ date: -1 });
-  res.json(items);
-});
-router.post('/claims', authMiddleware, async (req, res) => {
-  const { itemId, proof } = req.body;
-  const claim = new Claim({ item: itemId, claimant: req.user.userId, proof });
-  await claim.save();
-  // Optionally, set item status to 'claimed'
-  await Item.findByIdAndUpdate(itemId, { status: 'claimed' });
-  res.status(201).json(claim);
-});
-router.post('/admin/claims/:claimId/approve', authMiddleware, async (req, res) => {
-  if (req.user.role !== 'admin') return res.status(403).send('Forbidden');
-  const claim = await Claim.findById(req.params.claimId);
-  claim.status = 'approved';
-  claim.resolvedAt = Date.now();
-  await claim.save();
-  // Update item status
-  await Item.findByIdAndUpdate(claim.item, { status: 'returned' });
-  // (Optional) send notification
-  await sendNotification(claim.claimant, `Your claim on item ${claim.item} was approved.`);
-  res.json({ message: 'Claim approved' });
-});
-const nodemailer = require('nodemailer');
-async function sendNotification(userId, text) {
-  const user = await User.findById(userId);
-  if (!user || !user.email) return;
-  let transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
-  });
-  await transporter.sendMail({
-    from: process.env.EMAIL_USER,
-    to: user.email,
-    subject: 'Claim Status Update',
-    text
-  });
+require('dotenv').config();
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+
+const itemRoutes = require('./routes/items');
+
+const app = express();
+
+// 1. Middleware
+app.use(cors());
+app.use(express.json());
+
+// 2. Database Connection with Sanitization
+const uri = process.env.MONGODB_URI ? process.env.MONGODB_URI.trim() : null;
+
+if (!uri) {
+  console.error('❌ Error: MONGODB_URI is missing in .env file.');
+  process.exit(1);
 }
-const { body, validationResult } = require('express-validator');
-router.post('/items',
-  authMiddleware,
-  body('title').notEmpty(),
-  body('itemType').isIn(['lost','found']),
-  (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-    // ...create item
-  }
-);
+
+mongoose.connect(uri)
+  .then(() => console.log('✅ MongoDB connected successfully'))
+  .catch(err => {
+    console.error('❌ MongoDB connection error:', err.message);
+    process.exit(1); 
+  });
+
+// 3. API Routes
+app.use('/api', itemRoutes);
+
+// 4. Basic Health Check Route
+app.get('/', (req, res) => {
+  res.send('Lost & Found API is running...');
+});
+
+// 5. Global Error Handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Something went wrong on the server!' });
+});
+
+// 6. Start Server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server is barking on port ${PORT}`);
+});

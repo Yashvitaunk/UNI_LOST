@@ -1,68 +1,96 @@
-// routes/auth.js
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
-// Signup
-router.post('/signup', async (req, res) => {
-  const { name, email, password, mobile } = req.body;
-  const hashed = await bcrypt.hash(password, 10);             // hash password
-  const user = new User({ name, email, password: hashed, mobile });
-  await user.save();
-  // Issue JWT
-  const token = jwt.sign(
-    { userId: user._id, email: user.email, role: user.role },
-    process.env.JWT_SECRET,
-    { expiresIn: '2h' }
-  );
-  res.status(201).json({ token });
+// 1. MANUAL REGISTER ROUTE
+router.post('/register', async (req, res) => {
+    try {
+        const { name, email, mobile, password } = req.body;
+
+        // Check if user already exists
+        let user = await User.findOne({ email });
+        if (user) return res.status(400).json({ error: "User already exists" });
+
+        // Hash the password before saving
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        // Create and save the new user
+        user = new User({
+            name,
+            email,
+            mobile,
+            password: hashedPassword
+        });
+
+        await user.save();
+        res.status(201).json({ success: true, message: "User registered successfully" });
+
+    } catch (err) {
+        console.error('❌ Registration Error:', err.message);
+        res.status(500).json({ error: "Server Error during registration" });
+    }
 });
 
-// Login
+// 2. MANUAL LOGIN ROUTE (NEW)
 router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
-  const user = await User.findOne({ email });
-  if (!user || !(await bcrypt.compare(password, user.password))) {
-    return res.status(401).json({ error: 'Invalid credentials' });
-  }
-  const token = jwt.sign(
-    { userId: user._id, email: user.email, role: user.role },
-    process.env.JWT_SECRET,
-    { expiresIn: '2h' }
-  );
-  res.json({ token });
-});
-// OTP-based login
-router.post('/request-otp', async (req, res) => {
-  const { mobile } = req.body;
-  const otp = Math.floor(100000 + Math.random() * 900000); // 6-digit OTP
-  console.log(`OTP for ${mobile}: ${otp}`);
+    try {
+        const { email, password } = req.body;
 
-  // TODO: Save OTP in DB or temporary storage with expiration
-  // Example: await Otp.create({ mobile, otp, expiresAt: Date.now() + 5 * 60 * 1000 });
+        // Find user by email
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ error: "Invalid email or password" });
+        }
 
-  res.json({ message: 'OTP sent' });
-});
+        // Compare entered password with hashed password in DB
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ error: "Invalid email or password" });
+        }
 
-router.post('/verify-otp', async (req, res) => {
-  const { mobile, otp } = req.body;
+        // Create JWT Token
+        const token = jwt.sign(
+            { userId: user._id },
+            process.env.JWT_SECRET,
+            { expiresIn: '7d' }
+        );
 
-  // TODO: Validate OTP against stored value
-  // Example: const valid = await Otp.findOne({ mobile, otp });
+        res.status(200).json({
+            success: true,
+            token,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email
+            },
+            message: "Login successful!"
+        });
 
-  let user = await User.findOne({ mobile });
-  if (!user) {
-    user = new User({ name: mobile, mobile, password: '' }); // auto-register
-    await user.save();
-  }
-
-  const token = jwt.sign(
-    { userId: user._id, role: user.role },
-    process.env.JWT_SECRET,
-    { expiresIn: '2h' }
-  );
-  res.json({ token });
+    } catch (err) {
+        console.error("❌ Login Error:", err.message);
+        res.status(500).json({ error: "Server Error during login" });
+    }
 });
 
+// 3. GOOGLE LOGIN ROUTE
+router.post('/google-login', async (req, res) => {
+    try {
+        const { email, name, googleId, picture } = req.body;
+        let user = await User.findOne({ email });
+
+        if (!user) {
+            user = new User({ name, email, googleId, profilePic: picture });
+            await user.save();
+        }
+
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+        res.status(200).json({ success: true, token, user });
+    } catch (err) {
+        res.status(500).json({ error: "Google Auth Failed" });
+    }
+});
+
+module.exports = router;

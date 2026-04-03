@@ -9,4 +9,3 @@ const claimSchema = new mongoose.Schema({
   resolvedAt: Date
 });
 module.exports = mongoose.model('Claim', claimSchema);
-
