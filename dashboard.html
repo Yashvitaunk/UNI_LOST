@@ -67,39 +67,45 @@
 
     /* --- Main Content Area --- */
     .main-content { flex-grow: 1; padding: 30px; overflow-y: auto; }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-    .header h1 { font-size: 28px; color: var(--primary-color); margin: 0; }
-
     .content-section { display: none; background: var(--card-bg); padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
     .content-section.active { display: block; }
 
     /* --- Search Bar & Cards --- */
     .search-bar { display: flex; gap: 10px; margin-bottom: 30px; }
+    /* FIXED: Autocomplete off and styling */
     .search-bar input { flex-grow: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; }
     .search-bar button { background: #4f46e5; color: white; border: none; padding: 0 25px; border-radius: 8px; cursor: pointer; }
 
-    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
-    .card { background: #f9fafb; border-radius: 15px; padding: 15px; box-shadow: 0 5px 12px rgba(0,0,0,0.1); transition: 0.4s; text-align: center; border: 1px solid transparent; }
-    .card:hover { transform: translateY(-5px); background: #eef2ff; border-color: #4f46e5; }
-    .card img { width: 100%; height: 150px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; }
-    .card-tag { display: inline-block; padding: 4px 8px; font-size: 10px; font-weight: bold; border-radius: 5px; color: white; text-transform: uppercase; margin-bottom: 10px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+    /* CARD HIGHLIGHT STYLE */
+    .card { 
+      background: #fff; 
+      border: 1px solid #eee; 
+      border-radius: 12px; 
+      overflow: hidden; 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); 
+      transition: all 0.3s ease; 
+    }
+    .card-tag { padding: 5px; font-size: 10px; font-weight: bold; text-align: center; color: white; text-transform: uppercase; }
     .tag-found { background: #10b981; }
     .tag-lost { background: #ef4444; }
-    .card h3 { color: #4338ca; margin-bottom: 5px; font-size: 16px; }
-    .card p { font-size: 13px; color: #555; line-height: 1.4; margin-bottom: 10px; }
-
-    .claim-btn { background: linear-gradient(90deg, #6366f1, #8b5cf6); color: white; border: none; padding: 8px 12px; border-radius: 8px; font-size: 13px; cursor: pointer; transition: 0.3s; display: block; width: 100%; text-decoration: none; }
+    .card-body { padding: 15px; text-align: left; }
+    .card-body h3 { margin: 0 0 10px 0; font-size: 18px; color: #111; }
+    .card-body p { margin: 5px 0; font-size: 13px; color: #666; }
 
     /* --- Forms --- */
     .report-form label { display: block; margin-top: 15px; font-weight: 600; font-size: 14px; }
-    .report-form input, .report-form textarea, .report-form select { width: 100%; padding: 12px; margin-top: 5px; border-radius: 6px; border: 1px solid #ddd; box-sizing: border-box; }
+    .report-form input, .report-form textarea, .report-form select { 
+        width: 100%; padding: 12px; margin-top: 5px; border-radius: 6px; border: 1px solid #ddd; box-sizing: border-box; 
+    }
     .btn-submit { background-color: #10b981; color: white; border: none; padding: 14px; margin-top: 25px; border-radius: 6px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold; }
+    .btn-submit:disabled { background-color: #ccc; cursor: not-allowed; }
 
+    /* --- Logout & Modal --- */
     .logout-btn { margin-top: auto; padding: 20px; }
     .logout-btn a { display: block; text-align: center; padding: 12px; background: #ef4444; color: white; border-radius: 8px; text-decoration: none; font-weight: bold; }
-    
     .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
-    .modal-content { background: white; margin: 10% auto; padding: 30px; border-radius: 12px; max-width: 400px; }
+    .modal-content { background: white; margin: 10% auto; padding: 30px; border-radius: 12px; max-width: 400px; position: relative; }
   </style>
 </head>
 <body>
@@ -117,39 +123,38 @@
       <li class="nav-item"><a id="reportFoundLink">Report Found Item</a></li>
       <li class="nav-item"><a id="reportLostLink">Report Lost Item</a></li>
     </ul>
-    <div class="logout-btn"><a href="login.html">Logout</a></div>
+    <div class="logout-btn"><a href="index.html">Logout</a></div>
   </div>
 
   <div class="main-content">
-    <div class="header"><h1 id="contentTitle">Search Items</h1></div>
+    <h1 id="contentTitle">Item Directory</h1>
 
     <div id="searchSection" class="content-section active">
         <div class="search-bar">
-          <input type="text" id="searchInput" placeholder="Enter item name..." autocomplete="off">
+          <input type="text" id="searchInput" placeholder="Search items by name..." autocomplete="off">
           <button onclick="fetchItems()">Search</button>
         </div>
-        <div class="cards" id="itemsGrid">
-          </div>
+        <div class="cards" id="itemsGrid"></div>
     </div>
 
     <div id="reportFoundSection" class="content-section">
-      <h2>Report an Item You Found</h2>
+      <h2>Report a Found Item</h2>
       <form class="report-form" id="foundForm">
           <label>Item Name</label>
-          <input type="text" id="fName" placeholder="Enter item name" required>
+          <input type="text" id="fName" placeholder="e.g. Blue Wallet, Keys" required>
           <label>Category</label>
           <select id="fCategory">
             <option value="Electronics">Electronics</option>
             <option value="Documents">Documents</option>
             <option value="Accessories">Accessories</option>
           </select>
-          <label>Found Location</label>
-          <input type="text" id="fLocation" placeholder="Where did you find it?" required>
+          <label>Where was it found?</label>
+          <input type="text" id="fLocation" placeholder="e.g. Block AB2, Canteen" required>
           <label>Date Found</label>
           <input type="date" id="fDate">
           <label>Description</label>
-          <textarea id="fDesc" placeholder="Add additional details (color, markings)"></textarea>
-          <button type="button" class="btn-submit" onclick="submitItem('found')">Submit Found Item Report</button>
+          <textarea id="fDesc" rows="3" placeholder="Describe unique features..."></textarea>
+          <button type="button" class="btn-submit" id="btnFound" onclick="submitItem('found')">Submit Found Report</button>
       </form>
     </div>
 
@@ -157,88 +162,87 @@
       <h2>Report a Lost Item</h2>
       <form class="report-form" id="lostForm">
           <label>Item Name</label>
-          <input type="text" id="lName" placeholder="e.g. Blue Water Bottle" required>
+          <input type="text" id="lName" placeholder="e.g. Student ID Card" required>
           <label>Category</label>
           <select id="lCategory">
               <option value="ID/Cards">ID/Cards</option>
               <option value="Electronics">Electronics</option>
-              <option value="Apparel">Apparel</option>
+              <option value="Personal">Personal Items</option>
           </select>
           <label>Last Seen Location</label>
-          <input type="text" id="lLocation" placeholder="Where was it last seen?" required>
-          <label>Detailed Description</label>
-          <textarea id="lDesc" placeholder="Color, brand, stickers..."></textarea>
-          <label>Preferred Contact</label>
+          <input type="text" id="lLocation" placeholder="e.g. Library 2nd Floor" required>
+          <label>Description</label>
+          <textarea id="lDesc" rows="3" placeholder="Details like color, brand, stickers..."></textarea>
+          <label>Contact Information</label>
           <input type="text" id="lContact" placeholder="Phone or Email" required>
-          <button type="button" class="btn-submit" onclick="submitItem('lost')" style="background-color: var(--primary-color);">Submit Lost Item Report</button>
+          <button type="button" class="btn-submit" id="btnLost" onclick="submitItem('lost')" style="background-color: var(--primary-color);">Submit Lost Report</button>
       </form>
     </div>
   </div>
 
+  <div id="profileModal" class="modal">
+    <div class="modal-content">
+      <h3>Student Profile</h3>
+      <p><b>Name:</b> Yashvi Taunk</p>
+      <p><b>Registration:</b> 23fe10cse00634</p>
+      <p><b>Course:</b> B.Tech (CSE)</p>
+      <button class="btn-submit" onclick="document.getElementById('profileModal').style.display='none'">Close</button>
+    </div>
+  </div>
+
   <script>
-    const API_URL = 'https://uni-lost-backend.onrender.com/api/items';
+    const API_URL = 'http://localhost:3000/api/items';
     let isSubmitting = false;
 
     function switchContent(sectionId) {
         document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.nav-item a').forEach(a => a.classList.remove('active'));
+        
         document.getElementById(sectionId).classList.add('active');
         document.getElementById(sectionId.replace('Section', 'Link')).classList.add('active');
-        document.getElementById('contentTitle').innerText = sectionId === 'searchSection' ? 'Search Items' : (sectionId === 'reportFoundSection' ? 'Report Found Item' : 'Report Lost Item');
+        
+        document.getElementById('contentTitle').innerText = sectionId === 'searchSection' ? 'Item Directory' : 'Submit Report';
         if(sectionId === 'searchSection') fetchItems();
     }
 
     document.getElementById('searchLink').onclick = () => switchContent('searchSection');
     document.getElementById('reportFoundLink').onclick = () => switchContent('reportFoundSection');
     document.getElementById('reportLostLink').onclick = () => switchContent('reportLostSection');
+    document.getElementById('profileCard').onclick = () => document.getElementById('profileModal').style.display='block';
 
-    // AUTO-HIGHLIGHT AS YOU TYPE
+    // AUTO-HIGHLIGHT / HOVER EFFECT ON TYPEING
     document.getElementById('searchInput').addEventListener('input', function(e) {
         const searchTerm = e.target.value.toLowerCase();
         const cards = document.querySelectorAll('.card');
+
         cards.forEach(card => {
             const itemName = card.querySelector('h3').innerText.toLowerCase();
+            
             if (searchTerm !== "" && itemName.includes(searchTerm)) {
                 card.style.transform = "scale(1.05)";
                 card.style.boxShadow = "0 0 20px rgba(79, 70, 229, 0.4)";
                 card.style.borderColor = "#4f46e5";
+                card.style.zIndex = "5";
             } else {
                 card.style.transform = "scale(1)";
-                card.style.boxShadow = "0 5px 12px rgba(0,0,0,0.1)";
-                card.style.borderColor = "transparent";
+                card.style.boxShadow = "0 2px 8px rgba(0,0,0,0.05)";
+                card.style.borderColor = "#eee";
+                card.style.zIndex = "1";
             }
         });
     });
 
-    async function fetchItems() {
-        const grid = document.getElementById('itemsGrid');
-        grid.innerHTML = '<p><b>Waking up server...</b> (Takes 30-50 seconds if inactive)</p>';
-        try {
-            const res = await fetch(API_URL);
-            const items = await res.json();
-            grid.innerHTML = '';
-            if (items.length === 0) { grid.innerHTML = '<p>No items reported yet.</p>'; return; }
-            items.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                const tagClass = item.itemType === 'found' ? 'tag-found' : 'tag-lost';
-                card.innerHTML = `
-                    <span class="card-tag ${tagClass}">${item.itemType}</span>
-                    <h3>${item.name}</h3>
-                    <p><b>Loc:</b> ${item.location}<br><b>Cat:</b> ${item.category}</p>
-                    <p style="font-size:11px; color:#888;">"${item.description || ''}"</p>
-                    <button class="claim-btn">View Details</button>
-                `;
-                grid.appendChild(card);
-            });
-        } catch (err) { 
-            grid.innerHTML = '<p style="color:red;">Server error. Please wait a moment and refresh.</p>'; 
-        }
-    }
-
     async function submitItem(type) {
         if (isSubmitting) return;
+
+        const name = document.getElementById(type === 'found' ? 'fName' : 'lName').value;
+        if (!name) return alert("Please enter the item name.");
+
         isSubmitting = true;
+        const btn = document.getElementById(type === 'found' ? 'btnFound' : 'btnLost');
+        btn.innerText = "Processing...";
+        btn.disabled = true;
+
         const data = type === 'found' ? {
             name: document.getElementById('fName').value,
             category: document.getElementById('fCategory').value,
@@ -254,15 +258,65 @@
             contact: document.getElementById('lContact').value,
             itemType: 'lost'
         };
+
         try {
             const res = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
-            if(res.ok) { alert('✅ Item Reported Successfully!'); window.location.reload(); }
-        } catch (err) { alert('❌ Server is still waking up. Try again in 10 seconds.'); }
-        finally { isSubmitting = false; }
+            if(res.ok) {
+                alert('✅ Successfully saved to MongoDB!');
+                window.location.reload(); 
+            }
+        } catch (err) {
+            alert('❌ Server connection failed.');
+        } finally {
+            isSubmitting = false;
+            btn.innerText = "Submit Report";
+            btn.disabled = false;
+        }
+    }
+
+    async function fetchItems() {
+        const grid = document.getElementById('itemsGrid');
+        const query = document.getElementById('searchInput').value;
+        
+        grid.innerHTML = '<p>Refreshing directory...</p>';
+        
+        // Update URL if searching
+        const url = query ? `${API_URL}?name=${query}` : API_URL;
+        
+        try {
+            const res = await fetch(url);
+            const items = await res.json();
+            grid.innerHTML = ''; 
+
+            if (items.length === 0) {
+                grid.innerHTML = '<p>No items reported yet.</p>';
+                return;
+            }
+
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                const tagClass = item.itemType === 'found' ? 'tag-found' : 'tag-lost';
+                
+                card.innerHTML = `
+                    <div class="card-tag ${tagClass}">${item.itemType}</div>
+                    <div class="card-body">
+                        <h3>${item.name}</h3>
+                        <p><b>Location:</b> ${item.location}</p>
+                        <p><b>Category:</b> ${item.category}</p>
+                        <p style="color:#999; font-style:italic;">"${item.description || 'No description'}"</p>
+                        <button class="btn-submit" style="font-size:12px; padding:8px; background:#4f46e5;">View Details</button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        } catch (err) { 
+            grid.innerHTML = '<p>Database connection error.</p>'; 
+        }
     }
 
     window.onload = fetchItems;

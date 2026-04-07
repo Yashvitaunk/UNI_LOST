@@ -30,7 +30,7 @@ Handles form submissions and renders results based on backend responses
 
 📁 Folder Structure
 
-login.html – Login page
+index.html – Login page
 
 dashboard.html – Main page after login
 
