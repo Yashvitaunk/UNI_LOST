@@ -17,6 +17,7 @@
     input { width: 100%; padding: 12px; margin-bottom: 16px; border-radius: 8px; border: 1px solid #bbb; font-size: 14px; outline: none; background: rgba(255,255,255,0.9); box-sizing: border-box; }
     .btn { width: 100%; padding: 12px; background: #1d4ed8; color: white; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; margin-bottom: 14px; display: block; text-decoration: none; box-sizing: border-box; }
     .btn:hover { background: #0f3bb6; }
+    .btn:disabled { background: #ccc; cursor: not-allowed; }
     .signup { font-size: 13px; margin-top: 12px; color: #333; }
     .signup a { color: #1d4ed8; text-decoration: none; font-weight: bold; }
     .forgot { font-size: 12px; color: #1d4ed8; text-decoration: none; display: block; margin-bottom: 10px; }
@@ -42,7 +43,7 @@
       <label>Password</label>
       <input type="password" id="password" placeholder="Enter your password" required>
       <a href="#" class="forgot">Forgot Password?</a>
-      <button type="submit" class="btn">Login with Email</button>
+      <button type="submit" class="btn" id="loginBtn">Login with Email</button>
     </form>
 
     <div class="signup">
@@ -51,7 +52,11 @@
   </div>
 
   <script>
+    // LIVE BACKEND URL
+    const API_URL = 'https://uni-lost-backend.onrender.com/api/auth/login';
+
     const emailForm = document.getElementById('emailForm');
+    const loginBtn = document.getElementById('loginBtn');
 
     emailForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -59,9 +64,13 @@
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
 
+      // Loading State
+      loginBtn.innerText = "Authenticating...";
+      loginBtn.disabled = true;
+
       try {
-        // UPDATED PORT TO 3000
-        const response = await fetch('http://localhost:3000/api/auth/login', {
+        // Points to Render Live URL
+        const response = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
@@ -74,14 +83,18 @@
           localStorage.setItem('token', data.token);
           localStorage.setItem('userName', data.user.name);
           
-          alert('Login successful!');
+          alert('✅ Login successful!');
           window.location.href = 'dashboard.html'; 
         } else {
-          alert(data.error || 'Invalid email or password');
+          alert(data.error || '❌ Invalid email or password');
+          loginBtn.innerText = "Login with Email";
+          loginBtn.disabled = false;
         }
       } catch (err) {
         console.error("Login Fetch Error:", err);
-        alert('Cannot connect to server. Please ensure your backend is running on port 3000!');
+        alert('❌ Cannot connect to server. Note: If the server was inactive, it may take 50 seconds to wake up. Please wait and try again.');
+        loginBtn.innerText = "Login with Email";
+        loginBtn.disabled = false;
       }
     });
   </script>

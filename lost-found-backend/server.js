@@ -5,8 +5,8 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
 
-// 1. Pathing Fix: Ensure it finds the .env file in the subfolder
-dotenv.config({ path: path.join(__dirname, '.env') });
+// 1. Env config (Render handles env variables automatically, but this keeps local working)
+dotenv.config();
 
 const authRoutes = require('./routes/auth');
 const itemRoutes = require('./routes/items'); 
@@ -14,16 +14,13 @@ const claimRoutes = require('./routes/claims');
 
 const app = express();
 
-// 2. Updated Middleware: Explicitly allow Port 5500
-app.use(cors({
-    origin: ['http://127.0.0.1:5500', 'http://localhost:5500'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true
-}));
+// 2. Updated Middleware: Allow ALL origins for deployment 🚀
+// Isse GitHub Pages aur Localhost dono se requests aayengi toh server block nahi karega.
+app.use(cors()); 
 
 app.use(express.json());
 
-// 🧪 DEBUG: Essential to check if routes are functions (not objects)
+// 🧪 DEBUG: Check if routes are loaded correctly
 console.log('--- Route Import Check ---');
 console.log('🧪 authRoutes loaded:', typeof authRoutes);
 console.log('🧪 itemRoutes loaded:', typeof itemRoutes);
@@ -37,8 +34,7 @@ app.use('/api/claims', claimRoutes);
 
 // 3. Debug: Verify the URI is being read correctly
 if (!process.env.MONGODB_URI) {
-    console.error('❌ ERROR: MONGODB_URI is undefined. Check your .env file location.');
-    process.exit(1);
+    console.error('❌ ERROR: MONGODB_URI is missing in Environment Variables.');
 }
 
 // Connect to MongoDB and start server
@@ -47,10 +43,9 @@ const PORT = process.env.PORT || 3000;
 mongoose.connect(process.env.MONGODB_URI)
 .then(() => {
     console.log('✅ MongoDB connected successfully');
-    // Important: Server ONLY starts if DB connection is successful
     app.listen(PORT, () => {
-        console.log(`🚀 Server running on http://localhost:${PORT}`);
-        console.log(`📡 Accepting requests from http://127.0.0.1:5500`);
+        console.log(`🚀 Server running on port ${PORT}`);
+        console.log(`📡 CORS is now open for all origins (including GitHub Pages)`);
     });
 })
 .catch(err => {
@@ -60,5 +55,5 @@ mongoose.connect(process.env.MONGODB_URI)
 
 // Root test route
 app.get('/', (req, res) => {
-    res.send('UNI_LOST Backend is running!');
+    res.send('UNI_LOST Backend is LIVE and Running!');
 });
