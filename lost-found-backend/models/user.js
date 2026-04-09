@@ -3,14 +3,16 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
   name: { 
     type: String, 
-    required: true 
+    required: [true, "Name is required"],
+    trim: true
   },
   email: { 
     type: String, 
-    required: true, 
-    unique: true 
+    required: [true, "Email is required"], 
+    unique: true,
+    lowercase: true,
+    trim: true
   },
-  // Password is no longer 'required: true' to allow Google Sign-ins
   password: { 
     type: String, 
     required: function() {
@@ -20,17 +22,19 @@ const userSchema = new mongoose.Schema({
   },
   mobile: { 
     type: String, 
+    // unique: true ko hamesha sparse ke sath use karein
     unique: true,
-    sparse: true // Allows multiple users to have 'null' mobile numbers without error
+    sparse: true,
+    default: null 
   },
-  // New fields for Google Auth
   googleId: { 
     type: String, 
     unique: true, 
     sparse: true 
   },
   profilePic: { 
-    type: String 
+    type: String,
+    default: ""
   },
   role: { 
     type: String, 
@@ -38,5 +42,9 @@ const userSchema = new mongoose.Schema({
     default: 'user' 
   }
 }, { timestamps: true });
+
+// 🛠️ FIX FOR INDEX ERRORS:
+// Kabhi-kabhi indexing ki wajah se signup fail hota hai. Yeh line indexes ko re-sync karti hai.
+userSchema.index({ email: 1 }, { unique: true });
 
 module.exports = mongoose.model('User', userSchema);

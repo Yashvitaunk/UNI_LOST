@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Dashboard | Lost & Found</title>
+  <title>User Dashboard | UNI_LOST</title>
   <style>
     :root {
       --primary-color: #1d4ed8;
@@ -72,12 +72,10 @@
 
     /* --- Search Bar & Cards --- */
     .search-bar { display: flex; gap: 10px; margin-bottom: 30px; }
-    /* FIXED: Autocomplete off and styling */
     .search-bar input { flex-grow: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; }
     .search-bar button { background: #4f46e5; color: white; border: none; padding: 0 25px; border-radius: 8px; cursor: pointer; }
 
     .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
-    /* CARD HIGHLIGHT STYLE */
     .card { 
       background: #fff; 
       border: 1px solid #eee; 
@@ -106,12 +104,17 @@
     .logout-btn a { display: block; text-align: center; padding: 12px; background: #ef4444; color: white; border-radius: 8px; text-decoration: none; font-weight: bold; }
     .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
     .modal-content { background: white; margin: 10% auto; padding: 30px; border-radius: 12px; max-width: 400px; position: relative; }
+    
+    /* Connection Status Badge */
+    #statusBadge { font-size: 12px; margin-bottom: 10px; display: inline-block; padding: 4px 8px; border-radius: 4px; }
+    .status-online { background: #dcfce7; color: #166534; }
+    .status-offline { background: #fee2e2; color: #991b1b; }
   </style>
 </head>
 <body>
 
   <div class="sidebar">
-    <div class="logo-container"><h2>Lost & Found</h2></div>
+    <div class="logo-container"><h2>UNI_LOST</h2></div>
     <div class="user-profile-card" id="profileCard">
         <div class="profile-avatar">YT</div>
         <div class="profile-name">Yashvi Taunk</div>
@@ -127,6 +130,7 @@
   </div>
 
   <div class="main-content">
+    <div id="statusBadge" class="status-online">Connecting to Server...</div>
     <h1 id="contentTitle">Item Directory</h1>
 
     <div id="searchSection" class="content-section active">
@@ -191,8 +195,26 @@
   </div>
 
   <script>
-    const API_URL = 'http://localhost:3000/api/items';
+    // 🚀 UPDATE THIS LINK TO YOUR RENDER URL
+    const API_BASE = 'https://uni-lost-backend.onrender.com/api'; 
+    const API_URL = `${API_BASE}/items`;
+    
     let isSubmitting = false;
+
+    // Check server status on load
+    async function checkServer() {
+        const badge = document.getElementById('statusBadge');
+        try {
+            const res = await fetch(`${API_BASE}/auth/test`); // Assuming you have a test route or use root
+            if (res.ok) {
+                badge.innerText = "● Server Online";
+                badge.className = "status-online";
+            }
+        } catch (e) {
+            badge.innerText = "● Server Offline (Waking up...)";
+            badge.className = "status-offline";
+        }
+    }
 
     function switchContent(sectionId) {
         document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
@@ -209,28 +231,6 @@
     document.getElementById('reportFoundLink').onclick = () => switchContent('reportFoundSection');
     document.getElementById('reportLostLink').onclick = () => switchContent('reportLostSection');
     document.getElementById('profileCard').onclick = () => document.getElementById('profileModal').style.display='block';
-
-    // AUTO-HIGHLIGHT / HOVER EFFECT ON TYPEING
-    document.getElementById('searchInput').addEventListener('input', function(e) {
-        const searchTerm = e.target.value.toLowerCase();
-        const cards = document.querySelectorAll('.card');
-
-        cards.forEach(card => {
-            const itemName = card.querySelector('h3').innerText.toLowerCase();
-            
-            if (searchTerm !== "" && itemName.includes(searchTerm)) {
-                card.style.transform = "scale(1.05)";
-                card.style.boxShadow = "0 0 20px rgba(79, 70, 229, 0.4)";
-                card.style.borderColor = "#4f46e5";
-                card.style.zIndex = "5";
-            } else {
-                card.style.transform = "scale(1)";
-                card.style.boxShadow = "0 2px 8px rgba(0,0,0,0.05)";
-                card.style.borderColor = "#eee";
-                card.style.zIndex = "1";
-            }
-        });
-    });
 
     async function submitItem(type) {
         if (isSubmitting) return;
@@ -267,10 +267,14 @@
             });
             if(res.ok) {
                 alert('✅ Successfully saved to MongoDB!');
-                window.location.reload(); 
+                switchContent('searchSection');
+                document.getElementById(type === 'found' ? 'foundForm' : 'lostForm').reset();
+            } else {
+                alert('❌ Server Error: Could not save item.');
             }
         } catch (err) {
-            alert('❌ Server connection failed.');
+            console.error(err);
+            alert('❌ Connection failed. Ensure backend is running on Render.');
         } finally {
             isSubmitting = false;
             btn.innerText = "Submit Report";
@@ -283,8 +287,6 @@
         const query = document.getElementById('searchInput').value;
         
         grid.innerHTML = '<p>Refreshing directory...</p>';
-        
-        // Update URL if searching
         const url = query ? `${API_URL}?name=${query}` : API_URL;
         
         try {
@@ -292,7 +294,7 @@
             const items = await res.json();
             grid.innerHTML = ''; 
 
-            if (items.length === 0) {
+            if (!items || items.length === 0) {
                 grid.innerHTML = '<p>No items reported yet.</p>';
                 return;
             }
@@ -309,17 +311,19 @@
                         <p><b>Location:</b> ${item.location}</p>
                         <p><b>Category:</b> ${item.category}</p>
                         <p style="color:#999; font-style:italic;">"${item.description || 'No description'}"</p>
-                        <button class="btn-submit" style="font-size:12px; padding:8px; background:#4f46e5;">View Details</button>
                     </div>
                 `;
                 grid.appendChild(card);
             });
         } catch (err) { 
-            grid.innerHTML = '<p>Database connection error.</p>'; 
+            grid.innerHTML = '<p style="color:red;">⚠️ Database connection error. Check Render logs.</p>'; 
         }
     }
 
-    window.onload = fetchItems;
+    window.onload = () => {
+        checkServer();
+        fetchItems();
+    };
   </script>
 </body>
 </html>
