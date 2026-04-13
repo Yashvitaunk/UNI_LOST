@@ -3,57 +3,67 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const path = require('path');
+const path = require('path'); // Added for path handling
 
-// 1. Env config (Render handles env variables automatically, but this keeps local working)
-dotenv.config();
+// 1. Env config - Isse exact path mil jayega .env file ka
+dotenv.config({ path: path.join(__dirname, '.env') });
 
+// Route Imports
 const authRoutes = require('./routes/auth');
 const itemRoutes = require('./routes/items'); 
-const claimRoutes = require('./routes/claims');
+const claimRoutes = require('./routes/claims'); 
 
 const app = express();
 
-// 2. Updated Middleware: Allow ALL origins for deployment 🚀
-// Isse GitHub Pages aur Localhost dono se requests aayengi toh server block nahi karega.
+// 2. Middleware
 app.use(cors()); 
-
 app.use(express.json());
 
-// 🧪 DEBUG: Check if routes are loaded correctly
-console.log('--- Route Import Check ---');
-console.log('🧪 authRoutes loaded:', typeof authRoutes);
-console.log('🧪 itemRoutes loaded:', typeof itemRoutes);
-console.log('🧪 claimRoutes loaded:', typeof claimRoutes);
-console.log('--------------------------');
+// 🧪 DEBUG: Check if variables are loading
+console.log('--- System Check ---');
+console.log('📦 Auth Routes:', authRoutes ? 'LOADED' : 'FAILED');
+console.log('📦 Item Routes:', itemRoutes ? 'LOADED' : 'FAILED');
+console.log('📦 Claim Routes:', claimRoutes ? 'LOADED' : 'FAILED');
+console.log('🔑 MONGODB_URI check:', process.env.MONGODB_URI ? 'FOUND' : 'NOT FOUND');
+console.log('--------------------');
 
-// Routes
+// 3. API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/items', itemRoutes);
 app.use('/api/claims', claimRoutes);
 
-// 3. Debug: Verify the URI is being read correctly
-if (!process.env.MONGODB_URI) {
-    console.error('❌ ERROR: MONGODB_URI is missing in Environment Variables.');
+// 4. Root & Health Check
+app.get('/', (req, res) => {
+    res.json({ 
+        message: 'UNI_LOST Backend is LIVE', 
+        status: 'Healthy',
+        serverTime: new Date().toLocaleString()
+    });
+});
+
+// 5. Database Connection & Server Start
+const PORT = process.env.PORT || 3000;
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+    console.error('❌ FATAL ERROR: MONGODB_URI is not defined in .env file');
+    console.log('💡 TIP: Check if .env file is named correctly and is in the same folder.');
+    process.exit(1); 
 }
 
-// Connect to MongoDB and start server
-const PORT = process.env.PORT || 3000;
-
-mongoose.connect(process.env.MONGODB_URI)
+mongoose.connect(MONGODB_URI)
 .then(() => {
-    console.log('✅ MongoDB connected successfully');
+    console.log('✅ MongoDB Connected Successfully');
     app.listen(PORT, () => {
-        console.log(`🚀 Server running on port ${PORT}`);
-        console.log(`📡 CORS is now open for all origins (including GitHub Pages)`);
+        console.log(`🚀 Server listening on port ${PORT}`);
     });
 })
 .catch(err => {
-    console.error('❌ MongoDB connection error:');
-    console.error(err.message);
+    console.error('❌ Database Connection Failed:', err.message);
 });
 
-// Root test route
-app.get('/', (req, res) => {
-    res.send('UNI_LOST Backend is LIVE and Running!');
+// 6. Global Error Handler
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ error: 'Something went wrong on the server!' });
 });

@@ -1,56 +1,83 @@
+// routes/items.js
 const express = require('express');
 const router = express.Router();
 const Item = require('../models/item');
 
-// 1. GET all items (with Search and Filters)
-// URL: GET http://localhost:5000/api/items
+/**
+ * 1. GET Public Items (Directory)
+ * URL: GET /api/items
+ * LOGIC: Only returns "Found" items to students.
+ */
 router.get('/', async (req, res) => {
     try {
         let filter = {};
 
-        // Filter by Category, Location, or Type (lost/found)
+        // 🛡️ SECURITY: Force the filter to ONLY show "found" items in the UI.
+        // This keeps "lost" items hidden from the public list.
+        filter.itemType = 'found';
+
+        // Filters for Category and Location
         if (req.query.category) filter.category = req.query.category;
         if (req.query.location) filter.location = req.query.location;
-        if (req.query.itemType) filter.itemType = req.query.itemType;
 
-        // NEW: Search by Name (Case-insensitive keyword search)
+        // Search by Name (Case-insensitive keyword search)
         if (req.query.name) {
             filter.name = { $regex: req.query.name, $options: 'i' };
         }
 
-        // Fetch items and sort by newest first
         const items = await Item.find(filter).sort({ createdAt: -1 });
         res.json(items);
     } catch (err) {
-        console.error('Error fetching items:', err);
+        console.error('Error fetching public directory:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });
 
-// 2. POST a new item
-// URL: POST http://localhost:5000/api/items
+/**
+ * 2. POST New Item (Report Lost or Found)
+ * URL: POST /api/items
+ */
 router.post('/', async (req, res) => {
     try {
-        // Simple check to ensure required data is present
-        if (!req.body.name || !req.body.itemType) {
+        const { name, itemType } = req.body;
+
+        if (!name || !itemType) {
             return res.status(400).json({ error: 'Item name and type are required' });
         }
 
         const newItem = new Item(req.body);
         const savedItem = await newItem.save();
         
-        console.log(`✅ New ${req.body.itemType} item saved to Atlas: ${req.body.name}`);
+        console.log(`✅ ${itemType.toUpperCase()} report saved to Atlas: ${name}`);
         res.status(201).json(savedItem);
     } catch (err) {
         console.error('Error saving item:', err);
-        res.status(400).json({ error: 'Failed to create item', details: err.message });
+        res.status(400).json({ error: 'Failed to create report', details: err.message });
     }
 });
 
-// 3. GET a single item by ID (Useful for a "Details" page later)
+/**
+ * 3. ADMIN ONLY: GET All Lost Reports
+ * URL: GET /api/items/admin/lost-reports
+ * Use this to show the "Hidden" lost items during your presentation.
+ */
+router.get('/admin/lost-reports', async (req, res) => {
+    try {
+        const lostItems = await Item.find({ itemType: 'lost' }).sort({ createdAt: -1 });
+        res.json(lostItems);
+    } catch (err) {
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+/**
+ * 4. GET Single Item Details
+ * URL: GET /api/items/:id
+ * Used when a user clicks "View Details" to see the claim button.
+ */
 router.get('/:id', async (req, res) => {
     try {
-        const item = await Item.findById(req.id);
+        const item = await Item.findById(req.params.id);
         if (!item) return res.status(404).json({ error: 'Item not found' });
         res.json(item);
     } catch (err) {
